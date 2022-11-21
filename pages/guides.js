@@ -1,10 +1,10 @@
 import { useContext, useEffect, useState } from "react";
-import AuthContext from "../stores/authContext";
 import styles from "../styles/Guides.module.css";
+import AuthContext from "../stores/authContext";
 
 export default function Guides() {
-  const { user, authReady } = useContext(AuthContext);
-  const [guides, setGuides] = useState();
+  const { user, authReady, login } = useContext(AuthContext);
+  const [guides, setGuides] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -13,19 +13,20 @@ export default function Guides() {
         "/.netlify/functions/guides",
         user && {
           headers: {
-            Authorization: "Bearer" + user.token.access_token,
+            Authorization: "Bearer " + user.token.access_token,
           },
         }
       )
         .then((res) => {
           if (!res.ok) {
-            throw Error("You must be logged in to view this context");
+            login();
+            throw Error("You must be logged in to view this content");
           }
           return res.json();
         })
         .then((data) => {
-          setGuides(data);
           setError(null);
+          setGuides(data);
         })
         .catch((err) => {
           setError(err.message);
@@ -37,6 +38,7 @@ export default function Guides() {
   return (
     <div className={styles.guides}>
       {!authReady && <div>Loading...</div>}
+
       {error && (
         <div className={styles.error}>
           <p>{error}</p>
@@ -47,7 +49,7 @@ export default function Guides() {
         guides.map((guide) => (
           <div key={guide.title} className={styles.card}>
             <h3>{guide.title}</h3>
-            <h4>Written by {guide.author}</h4>
+            <h4>written by {guide.author}</h4>
             <p>
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Officiis
               deleniti rem aspernatur odit hic autem neque repellat alias?
@@ -61,7 +63,7 @@ export default function Guides() {
               inventore ipsum similique quos animi ipsa asperiores fuga dolor
               id.
             </p>
-          </div>
+           </div>
         ))}
     </div>
   );
